@@ -1,3 +1,6 @@
 [submodule "black-model-rest-api"]
 	path = black-model-rest-api
 	url = https://github.com/kingm77/black-model-rest-api
+[submodule "mumble-api"]
+	path = mumble-api
+	url = https://github.com/kingm77/mumble-api
