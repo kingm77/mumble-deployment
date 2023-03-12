@@ -1,0 +1,64 @@
+version: '3'
+
+
+
+services:
+
+  frontend:
+
+    image: front:latest
+
+    ports:
+
+      - "3000:3000"
+
+    environment:
+
+      REACT_APP_BACKEND_URL: "http://localhost:5000/graphql"
+
+  redis:
+    image: redis:latest
+
+    ports:
+      - "6379:6379"
+
+  pricing-api:
+    image: pricer:latest
+
+    ports: 
+      - "34566:34566"
+
+
+
+  api:
+
+    image: back:latest
+
+    ports:
+
+      - "5000:5000"
+
+    environment:
+
+      CLIENT_URL: "http://localhost:3000"
+
+      PRICING_SERVICE_URL: "http://localhost:34566"
+
+      REDIS_HOST: "redis"
+
+      REDIS_PORT: "6379"
+
+      MYSQL_HOST: "mysql"
+
+      MYSQL_PORT: "3306"
+
+      MYSQL_ACCOUNT: "root"
+
+      MYSQL_PASSWORD: "root"
+
+      MYSQL_DATABASE: "pricing_db"
+
+    depends_on:
+      - redis
+      - frontend
+      - pricing-api

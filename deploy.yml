@@ -1,0 +1,102 @@
+- name: Deploy Mumble
+
+  hosts: localhost
+
+  become: true
+
+  vars:
+
+    project_src: "{{ playbook_dir }}"
+
+
+
+  tasks:
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker
+        state: present
+
+    - name: Install Docker Compose
+
+      apt:
+
+        name: docker-compose
+
+        state: present
+
+    - name: Build pricer Docker image
+
+      docker_image:
+
+        name: pricer
+
+        path: "{{ project_src }}/black-model-rest-api/"
+
+        state: present
+
+
+
+    - name: Build front Docker image
+
+      docker_image:
+
+        name: front
+
+        path: "{{ project_src }}/mumble-client/"
+
+        state: present
+
+
+
+    - name: Build back Docker image
+
+      docker_image:
+
+        name: back
+
+        path: "{{ project_src }}/mumble-api/"
+
+        state: present
+
+
+
+    - name: Start MySQL container
+
+      docker_container:
+
+        name: mysql
+
+        image: mysql:5.7.41
+
+        state: started
+
+        published_ports:
+
+          - "3306:3306"
+
+        env:
+
+          MYSQL_ROOT_PASSWORD: root
+
+          MYSQL_DATABASE: pricing_db
+
+
+
+    - name: Build and start Docker containers
+
+      docker_compose:
+
+        project_name: pricing_app
+
+        project_src: "{{ project_src }}"
+
+        state: present
+
+        build: yes
+
+        pull: yes
+
+        remove_orphans: yes
+
