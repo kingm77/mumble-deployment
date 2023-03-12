@@ -1,0 +1,3 @@
+[submodule "black-model-rest-api"]
+	path = black-model-rest-api
+	url = https://github.com/kingm77/black-model-rest-api
