@@ -4,3 +4,6 @@
 [submodule "mumble-api"]
 	path = mumble-api
 	url = https://github.com/kingm77/mumble-api
+[submodule "mumble-client"]
+	path = mumble-client
+	url = https://github.com/kingm77/mumble-client
