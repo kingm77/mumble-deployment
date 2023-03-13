@@ -1,0 +1,102 @@
+- name: Deploy Mumble
+
+  hosts: localhost
+
+  become: true
+
+  tasks:
+    - name: Install Docker
+      apt:
+          name:
+            - docker.io
+          state: present
+    - name: Start Docker
+      command: service docker restart
+
+    - name: Install Docker module
+      pip:
+        name: docker
+
+    - name: Build pricer Docker image
+      docker_image:
+        name: pricer
+        source: build
+        build:
+          path: "/vagrant/black-model-rest-api"
+        state: present
+
+    - name: Build front Docker image
+      docker_image:
+        name: front
+        source: build
+        build:
+          path: "{{ project_src }}/mumble-client/"        
+        state: present
+
+    - name: Build back Docker image
+      docker_image:
+        name: back
+        source: build
+        build:
+          path: "{{ project_src }}/mumble-api/"
+        state: present
+
+    - name: Start Redis container
+      docker_container:
+        name: Redis
+        image: redis:latest
+        state: started
+        published_ports:
+          - "6379:6379"
+
+    - name: Start MySQL container
+      docker_container:
+        name: mysql
+        image: mysql:latest
+        state: started
+        published_ports:
+          - "3306:3306"
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: pricing_db
+
+    - name: Start Client container
+      docker_container:
+        name: client
+        image: front
+        state: started
+        published_ports:
+          - "3000:3000"
+        env:
+          REACT_APP_BACKEND_URL: "http://localhost:5000/graphql"
+
+    - name: Start pricing api container
+      docker_container:
+        name: pricer
+        image: pricer
+        state: started
+        published_ports:
+          - "34566:34566"
+    
+    - name: Start api container
+      docker_container:
+        name: api
+        image: back
+        state: started
+        published_ports:
+          - "5000:5000"
+        env:
+          CLIENT_URL: "http://localhost:3000"
+          PRICING_SERVICE_URL: "http://localhost:34566"
+          REDIS_HOST: "localhost"
+          REDIS_PORT: "6379"
+          MYSQL_HOST: "localhost"
+          MYSQL_PORT: "3306"
+          MYSQL_ACCOUNT: "root"
+          MYSQL_PASSWORD: "root"
+          MYSQL_DATABASE: "pricing_db"
+
+
+
+
+
